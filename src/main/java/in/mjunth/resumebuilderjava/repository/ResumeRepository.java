@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ResumeRepository extends MongoRepository<Resume,String> {
     List<Resume> findByUserIdOrderByUpdatedAt(String userId);
     Optional<Resume> findByUserIdAndId(String userId,String id);
+    void deleteByUserIdAndId(String userId,String id);
 }

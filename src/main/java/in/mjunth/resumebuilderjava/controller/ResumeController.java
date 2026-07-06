@@ -2,9 +2,9 @@ package in.mjunth.resumebuilderjava.controller;
 
 import in.mjunth.resumebuilderjava.document.Resume;
 import in.mjunth.resumebuilderjava.dto.CreateResumeRequest;
+import in.mjunth.resumebuilderjava.dto.ResumeUpdateRequest;
+import in.mjunth.resumebuilderjava.service.ImageUploadService;
 import in.mjunth.resumebuilderjava.service.ResumeService;
-import jakarta.mail.Multipart;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static in.mjunth.resumebuilderjava.utils.AppConstants.*;
 
@@ -24,6 +27,7 @@ import static in.mjunth.resumebuilderjava.utils.AppConstants.*;
 public class ResumeController {
 
     private final ResumeService resumeService;
+    private final ImageUploadService imageUploadService;
 
     @PostMapping
     public ResponseEntity<?> createResume(@Valid @RequestBody CreateResumeRequest request, Authentication authentication){
@@ -46,21 +50,25 @@ public class ResumeController {
 
     @PutMapping(ID)
     public ResponseEntity<?> updateResume(@PathVariable String id,
-                                          @RequestBody Resume updatedData){
-        return null;
+                                          @RequestBody ResumeUpdateRequest updatedData,
+                                          Authentication authentication){
+        Resume updatedResume = resumeService.updateResumeContent(id,updatedData,authentication.getPrincipal());
+        return ResponseEntity.ok(updatedResume);
     }
 
     @PutMapping(UPLOAD_IMAGE)
     public ResponseEntity<?> uploadResumeImages(@PathVariable String id,
-                                                @RequestPart(value = "thumbnail", required = true)Multipart thumbnail,
-                                                @RequestPart(value = "profilImage",required = false) Multipart profileImage,
-                                                HttpServletRequest request){
-        return null;
+                                                @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
+                                                @RequestPart(value = "profileImage",required = false) MultipartFile profileImage,
+                                                Authentication authentication) throws IOException {
+        Map<String,String> linkResponse = imageUploadService.uploadThumbnailAndProfileInfo(id,thumbnail,profileImage,authentication.getPrincipal());
+        return ResponseEntity.ok(linkResponse);
     }
 
     @DeleteMapping(ID)
-    public ResponseEntity<?> deleteResume(@PathVariable String id){
-        return null;
+    public ResponseEntity<?> deleteResume(@PathVariable String id,Authentication authentication){
+        Resume deletedResume = resumeService.deleteResume(id,authentication.getPrincipal());
+        return ResponseEntity.ok(Map.of("Message","Resume deleted Successfully"));
     }
 
 }
