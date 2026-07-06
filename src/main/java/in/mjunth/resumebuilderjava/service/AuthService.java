@@ -130,4 +130,25 @@ public class AuthService {
 
         return response;
     }
+
+    public void resendVerification(String email) {
+        User user = usersRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found"));
+
+        if(user.isEmailVerified()){
+            throw new RuntimeException("Email Already verified");
+        }
+
+        user.setVerificationToken(UUID.randomUUID().toString());
+        user.setVerificationExpires(LocalDateTime.now().plusHours(24));
+
+        usersRepository.save(user);
+
+        sendVerficationMail(user);
+
+    }
+
+    public AuthResponse getProfile(Object principalObject) {
+        User existingUser = (User) principalObject;
+        return toResponse(existingUser);
+    }
 }

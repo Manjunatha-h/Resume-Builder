@@ -37,27 +37,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try{
                 userId = jwtUtils.getUserIdFromToken(token);
             }catch (Exception e){
-                log.error("Token is Not valid/available");
-            }
-
-            if(userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
-                try{
-                    if(jwtUtils.validateToken(token) && !jwtUtils.isTokenExpired(token)){
-                        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not found"));
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user,null,new ArrayList<>());
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    }
-                }catch (Exception e){
-                    log.error("Exception occured while validating the user "+ e.getMessage());
-                }
-
-
+                log.error("token invalid/not found");
             }
         }
 
+        if(userId!=null && SecurityContextHolder.getContext().getAuthentication() == null){
+            try{
+                log.info("Inside JwtAuthenticationFilter ");
+                if(jwtUtils.validateToken(token) && !jwtUtils.isTokenExpired(token)){
+                    User user = userRepository.findById(userId).orElseThrow(()->new RuntimeException("user not found"));
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user,null,new ArrayList<>());
+                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }
+            }catch (Exception e){
+                log.error("token invalid/not found");
+            }
+        }
         filterChain.doFilter(request,response);
-
 
     }
 }
+
+

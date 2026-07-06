@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -19,10 +20,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        Map<String,String> errorResponse = new HashMap<>();
-        errorResponse.put("message","Not authorized, No token");
+        Map<String,String> errorReponse = new HashMap<>();
+        errorReponse.put("message","Not Authorized, No token");
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(response.getOutputStream(),errorResponse);
+        mapper.writeValue(response.getOutputStream(),errorReponse);
     }
 }
