@@ -48,8 +48,8 @@ public class AuthController {
 
     @PostMapping(UPLOAD_PROFILE)
     public ResponseEntity<?> uploadImage(@RequestPart("image") MultipartFile file) throws IOException {
-        Map<String, String> publicUrl = imageUploadService.uploadSingleImage(file);
-        return ResponseEntity.ok(publicUrl);
+        String publicUrl = imageUploadService.uploadSingleImage(file);
+        return ResponseEntity.ok(Map.of("ImageLink",publicUrl));
     }
 
     @PostMapping(LOGIN)
