@@ -47,8 +47,8 @@ public class AuthController {
     }
 
     @PostMapping(UPLOAD_PROFILE)
-    public ResponseEntity<?> uploadImage(@RequestPart("image") MultipartFile file) throws IOException {
-        String publicUrl = imageUploadService.uploadSingleImage(file);
+    public ResponseEntity<?> uploadImage(@RequestPart("image") MultipartFile file,Authentication authentication) throws IOException {
+        String publicUrl = imageUploadService.uploadProfileImage(file,authentication.getPrincipal());
         return ResponseEntity.ok(Map.of("ImageLink",publicUrl));
     }
 

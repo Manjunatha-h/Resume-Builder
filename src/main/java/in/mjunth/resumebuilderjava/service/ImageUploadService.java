@@ -3,8 +3,10 @@ package in.mjunth.resumebuilderjava.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import in.mjunth.resumebuilderjava.document.Resume;
+import in.mjunth.resumebuilderjava.document.User;
 import in.mjunth.resumebuilderjava.dto.AuthResponse;
 import in.mjunth.resumebuilderjava.repository.ResumeRepository;
+import in.mjunth.resumebuilderjava.repository.UserRepository;
 import jakarta.mail.Multipart;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +26,11 @@ public class ImageUploadService {
     private final Cloudinary cloudinary;
     private final AuthService authService;
     private final ResumeRepository resumeRepository;
+    private final UserRepository userRepository;
 
     public String uploadSingleImage(MultipartFile file) throws IOException {
         Map<String, Object> ImageUpRes = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("resource_type","image"));
+
         return ImageUpRes.get("secure_url").toString();
     }
 
@@ -52,5 +56,15 @@ public class ImageUploadService {
 
         resumeRepository.save(existingResume);
         return response;
+    }
+
+    public String uploadProfileImage(MultipartFile file, Object principal) throws IOException {
+        AuthResponse profile = authService.getProfile(principal);
+        User user = userRepository.findById(profile.getId()).orElseThrow(()->new RuntimeException("User not found"));
+        String profileLink = uploadSingleImage(file);
+        user.setProfileImageUrl(profileLink);
+        userRepository.save(user);
+        return profileLink;
+
     }
 }
